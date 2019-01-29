@@ -19,6 +19,7 @@ class Stepper {
         void move(DIRECTION toDirection, int steps);
         void handle();
         void stop();
+        void goToZero();
         int32_t getPosition();
 };
 

@@ -9,7 +9,7 @@ unsigned long time;
 
 bool stopped = true;
 volatile int32_t currentStepPositions = 0;
-int32_t targetStepPositions = 0;
+int32_t targetStepPosition = 0;
 DIRECTION direction = FORWARD;
 
 void stepCounterInterrupt()
@@ -68,18 +68,18 @@ void Stepper::move(DIRECTION toDirection, int steps)
     direction = toDirection;
     if (direction == FORWARD)
     {
-        targetStepPositions = currentStepPositions + steps;
+        targetStepPosition = currentStepPositions + steps;
         digitalWrite(this->_directionPin, HIGH); // TBD to check
 #ifdef STEPPER_DEBUG
-        STEPPER_DEBUG_LOG("Stepping forward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPositions, steps);
+        STEPPER_DEBUG_LOG("Stepping forward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPosition, steps);
 #endif
     }
     else if (direction == BACKWARD)
     {
-        targetStepPositions = currentStepPositions - steps;
+        targetStepPosition = currentStepPositions - steps;
         digitalWrite(this->_directionPin, LOW); // TBD to check
 #ifdef STEPPER_DEBUG
-        STEPPER_DEBUG_LOG("Stepping backward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPositions, steps);
+        STEPPER_DEBUG_LOG("Stepping backward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPosition, steps);
 #endif
     }
     ledcWrite(1, 128);
@@ -88,11 +88,11 @@ void Stepper::move(DIRECTION toDirection, int steps)
 
 void Stepper::handle()
 {
-    if (direction == FORWARD and currentStepPositions >= targetStepPositions)
+    if (direction == FORWARD and currentStepPositions >= targetStepPosition)
     {
         this->stop();
     }
-    else if (direction == BACKWARD and currentStepPositions <= targetStepPositions)
+    else if (direction == BACKWARD and currentStepPositions <= targetStepPosition)
     {
         this->stop();
     }
@@ -107,5 +107,14 @@ void Stepper::stop()
 #endif
         ledcWrite(1, 0);
         stopped = true;
+    }
+}
+
+void Stepper::goToZero()
+{
+    if (currentStepPositions > 0) {
+        this->move(BACKWARD, -2147483647);
+    } else if (currentStepPositions < 0) {
+        this->move(FORWARD, 2147483647);
     }
 }
