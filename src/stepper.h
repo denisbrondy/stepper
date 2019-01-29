@@ -13,6 +13,8 @@ class Stepper {
         int _pulsePin;
         int _directionPin;
         int _interruptPin;
+        void move();
+        void setMotorDirection(DIRECTION toDirection);
     public:
         Stepper(int pulsePin, int directionPin, int interruptPin, double frequency);
         void setFrequency(double frequency);

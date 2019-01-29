@@ -65,23 +65,39 @@ void Stepper::setFrequency(double frequency)
 
 void Stepper::move(DIRECTION toDirection, int steps)
 {
-    direction = toDirection;
-    if (direction == FORWARD)
+    if (toDirection == FORWARD)
     {
         targetStepPosition = currentStepPositions + steps;
-        digitalWrite(this->_directionPin, HIGH); // TBD to check
 #ifdef STEPPER_DEBUG
         STEPPER_DEBUG_LOG("Stepping forward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPosition, steps);
 #endif
     }
-    else if (direction == BACKWARD)
+    else if (toDirection == BACKWARD)
     {
         targetStepPosition = currentStepPositions - steps;
-        digitalWrite(this->_directionPin, LOW); // TBD to check
 #ifdef STEPPER_DEBUG
         STEPPER_DEBUG_LOG("Stepping backward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPosition, steps);
 #endif
     }
+    this->setMotorDirection(toDirection);
+    this->move();
+}
+
+void Stepper::setMotorDirection(DIRECTION toDirection)
+{
+    if (toDirection == FORWARD)
+    {
+        digitalWrite(this->_directionPin, HIGH); // TBD to check
+    }
+    else if (toDirection == BACKWARD)
+    {
+        digitalWrite(this->_directionPin, LOW); // TBD to check
+    }
+    direction = toDirection;
+}
+
+void Stepper::move()
+{
     ledcWrite(1, 128);
     stopped = false;
 }
@@ -112,15 +128,16 @@ void Stepper::stop()
 
 void Stepper::goToZero()
 {
-    if (currentStepPositions > 0) {
+    if (currentStepPositions > 0)
+    {
         targetStepPosition = 0;
-        digitalWrite(this->_directionPin, LOW); // TBD CHECK
-        ledcWrite(1, 128);
-        stopped = false;
-    } else if (currentStepPositions < 0) {
+        this->setMotorDirection(BACKWARD);
+        this->move();
+    }
+    else if (currentStepPositions < 0)
+    {
         targetStepPosition = 0;
-        digitalWrite(this->_directionPin, HIGH); // TBD CHECK
-        ledcWrite(1, 128);
-        stopped = false;
+        this->setMotorDirection(FORWARD);
+        this->move();
     }
 }
