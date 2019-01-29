@@ -102,6 +102,10 @@ void Stepper::move()
     stopped = false;
 }
 
+bool Stepper::moving() {
+    return !stopped;
+}
+
 void Stepper::handle()
 {
     if (direction == FORWARD and currentStepPositions >= targetStepPosition)

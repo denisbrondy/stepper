@@ -23,6 +23,7 @@ class Stepper {
         void stop();
         void goToZero();
         int32_t getPosition();
+        bool moving();
 };
 
 #endif
