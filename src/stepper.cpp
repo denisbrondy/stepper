@@ -113,8 +113,14 @@ void Stepper::stop()
 void Stepper::goToZero()
 {
     if (currentStepPositions > 0) {
-        this->move(BACKWARD, -2147483647);
+        targetStepPosition = 0;
+        digitalWrite(this->_directionPin, LOW); // TBD CHECK
+        ledcWrite(1, 128);
+        stopped = false;
     } else if (currentStepPositions < 0) {
-        this->move(FORWARD, 2147483647);
+        targetStepPosition = 0;
+        digitalWrite(this->_directionPin, HIGH); // TBD CHECK
+        ledcWrite(1, 128);
+        stopped = false;
     }
 }
