@@ -24,6 +24,7 @@ class Stepper {
         void goToZero();
         int32_t getPosition();
         bool moving();
+        void resetZeroPosition();
 };
 
 #endif

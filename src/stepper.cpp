@@ -8,7 +8,7 @@ unsigned long time;
 #endif
 
 bool stopped = true;
-volatile int32_t currentStepPositions = 0;
+volatile int32_t currentStepPosition = 0;
 int32_t targetStepPosition = 0;
 DIRECTION direction = FORWARD;
 
@@ -25,17 +25,17 @@ void stepCounterInterrupt()
 #endif
     if (direction == FORWARD)
     {
-        currentStepPositions++;
+        currentStepPosition++;
     }
     else if (direction == BACKWARD)
     {
-        currentStepPositions--;
+        currentStepPosition--;
     }
 }
 
 int32_t Stepper::getPosition()
 {
-    return currentStepPositions;
+    return currentStepPosition;
 }
 
 Stepper::Stepper(int pulsePin, int directionPin, int interruptPin, double frequency)
@@ -67,16 +67,16 @@ void Stepper::move(DIRECTION toDirection, int steps)
 {
     if (toDirection == FORWARD)
     {
-        targetStepPosition = currentStepPositions + steps;
+        targetStepPosition = currentStepPosition + steps;
 #ifdef STEPPER_DEBUG
-        STEPPER_DEBUG_LOG("Stepping forward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPosition, steps);
+        STEPPER_DEBUG_LOG("Stepping forward from step position : %d to %d (%d steps)\n", currentStepPosition, targetStepPosition, steps);
 #endif
     }
     else if (toDirection == BACKWARD)
     {
-        targetStepPosition = currentStepPositions - steps;
+        targetStepPosition = currentStepPosition - steps;
 #ifdef STEPPER_DEBUG
-        STEPPER_DEBUG_LOG("Stepping backward from step position : %d to %d (%d steps)\n", currentStepPositions, targetStepPosition, steps);
+        STEPPER_DEBUG_LOG("Stepping backward from step position : %d to %d (%d steps)\n", currentStepPosition, targetStepPosition, steps);
 #endif
     }
     this->setMotorDirection(toDirection);
@@ -108,11 +108,11 @@ bool Stepper::moving() {
 
 void Stepper::handle()
 {
-    if (direction == FORWARD and currentStepPositions >= targetStepPosition)
+    if (direction == FORWARD and currentStepPosition >= targetStepPosition)
     {
         this->stop();
     }
-    else if (direction == BACKWARD and currentStepPositions <= targetStepPosition)
+    else if (direction == BACKWARD and currentStepPosition <= targetStepPosition)
     {
         this->stop();
     }
@@ -132,16 +132,22 @@ void Stepper::stop()
 
 void Stepper::goToZero()
 {
-    if (currentStepPositions > 0)
+    if (currentStepPosition > 0)
     {
         targetStepPosition = 0;
         this->setMotorDirection(BACKWARD);
         this->move();
     }
-    else if (currentStepPositions < 0)
+    else if (currentStepPosition < 0)
     {
         targetStepPosition = 0;
         this->setMotorDirection(FORWARD);
         this->move();
     }
+}
+
+void Stepper::resetZeroPosition() {
+    this->stop();
+    currentStepPosition = 0;
+    targetStepPosition = 0;
 }
